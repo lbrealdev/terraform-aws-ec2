@@ -12,6 +12,7 @@ Same shape as [terraform-aws-rds](https://github.com/lbrealdev/terraform-aws-rds
 | `security_group_id` | yes | Existing security group in that VPC (`sg-...`) |
 | `name` | yes | `Name` tag of the instance |
 | `user_data` | no | User data script. Sensitive. Omit to leave it unset |
+| `iam_instance_profile` | no | Name of an existing IAM instance profile. Omit to leave it unset. This stack does not create the profile |
 | `ami` | yes | AMI ID (`ami-...`). No default image |
 | `instance_type` | no | Defaults to `t3.micro` |
 | `aws_region` | no | Defaults to `eu-central-1` |

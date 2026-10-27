@@ -19,10 +19,11 @@ module "ec2_networking_data" {
 module "ec2_instance" {
   source = "./modules/ec2_instance"
 
-  name              = var.name
-  ami               = var.ami
-  instance_type     = var.instance_type
-  user_data         = var.user_data
-  subnet_id         = module.ec2_networking_data.subnet_id
-  security_group_id = module.ec2_networking_data.security_group_id
+  name                 = var.name
+  ami                  = var.ami
+  instance_type        = var.instance_type
+  user_data            = var.user_data
+  iam_instance_profile = var.iam_instance_profile
+  subnet_id            = module.ec2_networking_data.subnet_id
+  security_group_id    = module.ec2_networking_data.security_group_id
 }

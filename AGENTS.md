@@ -4,7 +4,7 @@ One EC2 instance from an existing VPC, subnet, and security group. Do not add VP
 
 ## Interface
 
-Root variables are the only caller inputs: `vpc_id`, `subnet_id`, `security_group_id`, `name`, `user_data`, `ami`, `instance_type`, `aws_region`.
+Root variables are the only caller inputs: `vpc_id`, `subnet_id`, `security_group_id`, `name`, `user_data`, `iam_instance_profile`, `ami`, `instance_type`, `aws_region`. `iam_instance_profile` is the name of an existing profile. Do not create the profile.
 
 `just use-config` copies `examples/ec2.tfvars.example` to gitignored `terraform.tfvars`. Terraform loads that file on `plan` and `apply`. Do not commit it.
 

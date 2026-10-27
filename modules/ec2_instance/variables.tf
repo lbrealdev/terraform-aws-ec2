@@ -29,3 +29,14 @@ variable "user_data" {
   default     = null
   sensitive   = true
 }
+
+variable "iam_instance_profile" {
+  description = "Name of an existing IAM instance profile. Null leaves the instance without one. This module does not create the profile."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.iam_instance_profile == null || length(var.iam_instance_profile) > 0
+    error_message = "iam_instance_profile must be the name of an existing instance profile, or null."
+  }
+}
