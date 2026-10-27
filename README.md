@@ -19,13 +19,19 @@ Same shape as [terraform-aws-rds](https://github.com/lbrealdev/terraform-aws-rds
 ## Commands
 
 ```bash
-mise install
+mise trust
 just use-config
 # edit terraform.tfvars with the VPC, subnet, security group, AMI, and name
 just init
 just validate
 just plan
 just apply
+```
+
+Run `mise trust` once per clone. `mise.toml` sets `auto_install = false`, and mise ignores `[settings]` until that file is trusted. After trust, entering the directory or running `just` does not install tools. Install the pinned toolchain only when you want it:
+
+```bash
+mise install
 ```
 
 `just use-config` copies `examples/ec2.tfvars.example` to `terraform.tfvars`. That file is gitignored. Terraform loads it automatically. `just plan` and `just apply` need AWS credentials for the account that owns those IDs. `just validate` does not.
