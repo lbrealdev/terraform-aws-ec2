@@ -6,6 +6,8 @@ One EC2 instance from an existing VPC, subnet, and security group. Do not add VP
 
 Root variables are the only caller inputs: `vpc_id`, `subnet_id`, `security_group_id`, `name`, `user_data`, `ami`, `instance_type`, `aws_region`.
 
+`just use-config` copies `examples/ec2.tfvars.example` to gitignored `terraform.tfvars`. Terraform loads that file on `plan` and `apply`. Do not commit it.
+
 `modules/ec2_networking_data` looks up those IDs and checks the subnet and security group belong to the VPC. `modules/ec2_instance` creates the instance from the looked-up IDs.
 
 ## Rules

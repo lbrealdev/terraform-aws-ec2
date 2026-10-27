@@ -16,23 +16,25 @@ Same shape as [terraform-aws-rds](https://github.com/lbrealdev/terraform-aws-rds
 | `instance_type` | no | Defaults to `t3.micro` |
 | `aws_region` | no | Defaults to `eu-central-1` |
 
-Copy `examples/ec2.tfvars.example` to a gitignored `*.tfvars` file and fill in real IDs.
-
-## Layout
-
-| Path | Purpose |
-|------|---------|
-| `modules/ec2_networking_data` | Reads the VPC, subnet, and security group. Fails if the subnet or security group is not in `vpc_id` |
-| `modules/ec2_instance` | Creates `aws_instance` |
-
 ## Commands
 
 ```bash
 mise install
+just use-config
+# edit terraform.tfvars with the VPC, subnet, security group, AMI, and name
 just init
 just validate
 just plan
 just apply
 ```
 
-`just plan` and `just apply` need AWS credentials and the real VPC, subnet, and security group. `just validate` does not.
+`just use-config` copies `examples/ec2.tfvars.example` to `terraform.tfvars`. That file is gitignored. Terraform loads it automatically. `just plan` and `just apply` need AWS credentials for the account that owns those IDs. `just validate` does not.
+
+## Layout
+
+| Path | Purpose |
+|------|---------|
+| `examples/ec2.tfvars.example` | Committed placeholder values |
+| `terraform.tfvars` | Local values, created by `just use-config`, not committed |
+| `modules/ec2_networking_data` | Reads the VPC, subnet, and security group. Fails if the subnet or security group is not in `vpc_id` |
+| `modules/ec2_instance` | Creates `aws_instance` |
