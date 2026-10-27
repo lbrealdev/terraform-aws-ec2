@@ -1,0 +1,11 @@
+aws_region        = "eu-central-1"
+vpc_id            = "vpc-0123456789abcdef0"
+subnet_id         = "subnet-0123456789abcdef0"
+security_group_id = "sg-0123456789abcdef0"
+name              = "ec2-test"
+ami               = "ami-0123456789abcdef0"
+instance_type     = "t3.micro"
+# user_data       = <<-EOT
+#   #!/bin/bash
+#   echo hello
+# EOT
