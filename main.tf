@@ -25,14 +25,23 @@ module "ec2_instance" {
   name          = local.instance_name
   ami           = var.ami
   instance_type = var.instance_type
+  key_name      = var.key_name
+  monitoring    = var.monitoring
 
   # --- Access ---
   user_data            = var.user_data
   iam_instance_profile = var.iam_instance_profile
 
   # --- Network ---
-  subnet_id          = module.ec2_networking_data.subnet_id
-  security_group_ids = module.ec2_networking_data.security_group_ids
+  subnet_id                   = module.ec2_networking_data.subnet_id
+  security_group_ids          = module.ec2_networking_data.security_group_ids
+  associate_public_ip_address = var.associate_public_ip_address
+
+  # --- Storage ---
+  root_block_device = var.root_block_device
+
+  # --- Metadata ---
+  metadata_options = var.metadata_options
 
   tags = var.tags
 }

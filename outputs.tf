@@ -32,3 +32,18 @@ output "public_ip" {
   description = "Public IP of the EC2 instance, if assigned"
   value       = module.ec2_instance.public_ip
 }
+
+output "private_dns" {
+  description = "Private DNS name of the EC2 instance"
+  value       = module.ec2_instance.private_dns
+}
+
+output "public_dns" {
+  description = "Public DNS name of the EC2 instance, if assigned"
+  value       = module.ec2_instance.public_dns
+}
+
+output "availability_zone" {
+  description = "Availability zone of the EC2 instance"
+  value       = module.ec2_instance.availability_zone
+}

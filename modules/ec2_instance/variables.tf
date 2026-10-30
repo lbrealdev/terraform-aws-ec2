@@ -48,6 +48,65 @@ variable "iam_instance_profile" {
   }
 }
 
+variable "key_name" {
+  description = "Name of an existing EC2 key pair. Null leaves the instance without a key pair"
+  type        = string
+  default     = null
+}
+
+variable "associate_public_ip_address" {
+  description = "Associate a public IP address with the instance. Null uses the subnet MapPublicIpOnLaunch setting"
+  type        = bool
+  default     = null
+}
+
+variable "monitoring" {
+  description = "Enable detailed monitoring"
+  type        = bool
+  default     = false
+}
+
+variable "root_block_device" {
+  description = "Root EBS volume settings. Defaults to encrypted gp3"
+  type = object({
+    volume_size = optional(number)
+    volume_type = optional(string, "gp3")
+    encrypted   = optional(bool, true)
+  })
+  default = {}
+
+  validation {
+    condition     = contains(["standard", "gp2", "gp3", "io1", "io2"], var.root_block_device.volume_type)
+    error_message = "root_block_device.volume_type must be one of: standard, gp2, gp3, io1, io2."
+  }
+
+  validation {
+    condition     = var.root_block_device.volume_size == null || var.root_block_device.volume_size > 0
+    error_message = "root_block_device.volume_size must be greater than 0 when set."
+  }
+}
+
+variable "metadata_options" {
+  description = "Instance metadata options. IMDSv2 is required by default"
+  type = object({
+    http_endpoint               = optional(string, "enabled")
+    http_tokens                 = optional(string, "required")
+    http_put_response_hop_limit = optional(number, 1)
+    instance_metadata_tags      = optional(string)
+  })
+  default = {}
+
+  validation {
+    condition     = contains(["required", "optional"], var.metadata_options.http_tokens)
+    error_message = "metadata_options.http_tokens must be \"required\" or \"optional\"."
+  }
+
+  validation {
+    condition     = contains(["enabled", "disabled"], var.metadata_options.http_endpoint)
+    error_message = "metadata_options.http_endpoint must be \"enabled\" or \"disabled\"."
+  }
+}
+
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
