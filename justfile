@@ -35,23 +35,17 @@ alias refresh := tf-refresh
 # Configuration
 # ============================================================================
 
-# Scaffold terraform.tfvars from examples/<profile>.tfvars.example
-use-config profile:
+# Copy examples/ec2.tfvars.example to gitignored terraform.tfvars
+tfvars:
     #!/usr/bin/env bash
     set -euo pipefail
-    src="examples/{{ profile }}.tfvars.example"
-    if [ ! -f "$src" ]; then
-        echo "Unknown profile: {{ profile }}"
-        echo "Available:"
-        ls examples/*.tfvars.example
-        exit 1
-    fi
+    src="examples/ec2.tfvars.example"
     if [ -f terraform.tfvars ]; then
-        echo "terraform.tfvars already exists — remove it first or edit in place."
+        echo "terraform.tfvars already exists. Remove it first or edit it in place."
         exit 1
     fi
     cp "$src" terraform.tfvars
-    echo "Created terraform.tfvars from $src — edit it before plan/apply."
+    echo "Created terraform.tfvars from $src. Edit it before plan/apply."
 
 # ============================================================================
 # Terraform recipes

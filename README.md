@@ -15,11 +15,17 @@ Terraform module stack that creates one EC2 instance from a VPC, subnet, and sec
 > [!NOTE]
 > This repo uses [mise](https://mise.jdx.dev) for the toolchain and [just](https://github.com/casey/just) for command shortcuts, but running the module only needs Terraform. See [docs/terraform-workflow.md](docs/terraform-workflow.md).
 
-1. Scaffold local config from the EC2 example:
+`mise.toml` pins tools and sets `auto_install = false`.
 
 ```bash
-just use-config ec2
-# edit terraform.tfvars with your VPC, subnet, security groups, AMI, etc.
+mise trust
+mise install
+```
+
+1. Copy the example into gitignored `terraform.tfvars` and fill in the required IDs:
+
+```bash
+just tfvars
 ```
 
 2. Run:
@@ -29,16 +35,10 @@ just init
 just plan
 # review plan
 just apply
-# later: just cleanup  # remove local .terraform / plan files (prompts; does not destroy cloud resources)
+# later: just cleanup
 ```
 
-`mise.toml` sets `auto_install = false`. After trust, entering the directory or running `just` does not install tools. Install the pinned toolchain only when you want it:
-
-```bash
-mise install
-```
-
-`just use-config ec2` copies `examples/ec2.tfvars.example` to `terraform.tfvars`. That file is gitignored. Terraform loads it automatically. `just plan` and `just apply` need AWS credentials for the account that owns those IDs. `just validate` does not.
+`just plan` and `just apply` need AWS credentials. `just validate` does not.
 
 ### Minimal Example
 
