@@ -67,9 +67,9 @@ variable "monitoring" {
 }
 
 variable "root_block_device" {
-  description = "Root EBS volume settings. Defaults to encrypted gp3"
+  description = "Root EBS volume settings. Defaults to 30 GiB encrypted gp3"
   type = object({
-    volume_size = optional(number)
+    volume_size = optional(number, 30)
     volume_type = optional(string, "gp3")
     encrypted   = optional(bool, true)
   })
@@ -81,8 +81,8 @@ variable "root_block_device" {
   }
 
   validation {
-    condition     = var.root_block_device.volume_size == null || var.root_block_device.volume_size > 0
-    error_message = "root_block_device.volume_size must be greater than 0 when set."
+    condition     = var.root_block_device.volume_size > 0
+    error_message = "root_block_device.volume_size must be greater than 0."
   }
 }
 

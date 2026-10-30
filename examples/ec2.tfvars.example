@@ -10,29 +10,29 @@ subnet_id          = "subnet-0123456789abcdef0"
 security_group_ids = ["sg-0123456789abcdef0"]
 
 # --- module: ec2_instance ---
-instance_enabled = true
+instance_enabled            = true
 # Optional Name tag override. Default: ec2-<prefix_name>-instance
-# name = "ec2-test"
-ami           = "ami-0123456789abcdef0"
-instance_type = "t3.micro"
-key_name      = null
+# name                      = "ec2-test"
+ami                         = "ami-0123456789abcdef0"
+instance_type               = "t3.micro"
+key_name                    = null
 associate_public_ip_address = null # subnet MapPublicIpOnLaunch; set false to deny a public IP
-monitoring    = false
+monitoring                  = false
 
 # Storage (encrypted gp3 by default)
-root_block_device = {
+root_block_device           = {
+  volume_size = 30
   volume_type = "gp3"
   encrypted   = true
-  # volume_size = 20
 }
 
 # Metadata (IMDSv2 required by default)
-metadata_options = {
+metadata_options            = {
   http_tokens = "required"
 }
 
-# iam_instance_profile = "existing-profile-name"
-# user_data            = <<-EOT
+# iam_instance_profile      = "existing-profile-name"
+# user_data                 = <<-EOT
 #   #!/bin/bash
 #   echo hello
 # EOT

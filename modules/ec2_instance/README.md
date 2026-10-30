@@ -33,7 +33,7 @@ module "ec2_instance" {
   security_group_ids = ["sg-0123456789abcdef0"]
 
   root_block_device = {
-    volume_size = 20
+    volume_size = 30
     volume_type = "gp3"
     encrypted   = true
   }
@@ -106,7 +106,7 @@ module "ec2_instance" {
 | `key_name` | Name of an existing EC2 key pair | `string` | `null` |
 | `associate_public_ip_address` | Associate a public IP. Null uses the subnet setting | `bool` | `null` |
 | `monitoring` | Enable detailed monitoring | `bool` | `false` |
-| `root_block_device` | Root EBS volume settings (`volume_type` gp3, `encrypted` true) | `object` | `{}` |
+| `root_block_device` | Root EBS volume settings (`volume_size` 30 GiB, `volume_type` gp3, `encrypted` true) | `object` | `{}` |
 | `metadata_options` | Instance metadata options (`http_tokens` required) | `object` | `{}` |
 | `tags` | A map of tags to add to all resources. Merged with `Name` | `map(string)` | `{}` |
 
