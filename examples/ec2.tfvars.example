@@ -1,15 +1,38 @@
-aws_region         = "eu-central-1"
-prefix_name        = "dev"
-tags               = {}
+# --- Global ---
+aws_region  = "eu-central-1"
+prefix_name = "dev"
+tags        = {}
+
+# --- module: ec2_networking_data ---
 networking_enabled = true
 vpc_id             = "vpc-0123456789abcdef0"
 subnet_id          = "subnet-0123456789abcdef0"
 security_group_ids = ["sg-0123456789abcdef0"]
-instance_enabled   = true
-ami                = "ami-0123456789abcdef0"
-instance_type      = "t3.micro"
+
+# --- module: ec2_instance ---
+instance_enabled = true
+# Optional Name tag override. Default: ec2-<prefix_name>-instance
+# name = "ec2-test"
+ami           = "ami-0123456789abcdef0"
+instance_type = "t3.micro"
+key_name      = null
+associate_public_ip_address = null # subnet MapPublicIpOnLaunch; set false to deny a public IP
+monitoring    = false
+
+# Storage (encrypted gp3 by default)
+root_block_device = {
+  volume_type = "gp3"
+  encrypted   = true
+  # volume_size = 20
+}
+
+# Metadata (IMDSv2 required by default)
+metadata_options = {
+  http_tokens = "required"
+}
+
 # iam_instance_profile = "existing-profile-name"
-# user_data       = <<-EOT
+# user_data            = <<-EOT
 #   #!/bin/bash
 #   echo hello
 # EOT
