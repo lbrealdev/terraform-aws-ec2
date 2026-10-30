@@ -13,9 +13,7 @@ Terraform module stack that creates one EC2 instance from a VPC, subnet, and sec
 ## Quickstart
 
 > [!NOTE]
-> This repo uses [`just`](https://github.com/casey/just) as its task runner (`just init`, `just plan`, etc.).
-> Install [mise](https://mise.jdx.dev), run **`mise trust`** once to trust [`mise.toml`](./mise.toml), then **`mise install`** from the repo root to install the full toolchain (`terraform`, `just`, `aws`, `terraform-docs`).
-> If you already manage tools yourself, you only need `just` (plus whatever each recipe requires).
+> This repo uses [mise](https://mise.jdx.dev) for the toolchain and [just](https://github.com/casey/just) for command shortcuts, but running the module only needs Terraform. See [docs/terraform-workflow.md](docs/terraform-workflow.md).
 
 1. Scaffold local config from the EC2 example:
 
