@@ -11,6 +11,24 @@
 @init *ARGS:
     terraform init {{ ARGS }}
 
+# Scaffold terraform.tfvars from examples/<profile>.tfvars.example (default: ec2)
+use-config profile="ec2":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    src="examples/{{ profile }}.tfvars.example"
+    if [ ! -f "$src" ]; then
+        echo "Unknown profile: {{ profile }}"
+        echo "Available:"
+        ls examples/*.tfvars.example
+        exit 1
+    fi
+    if [ -f terraform.tfvars ]; then
+        echo "terraform.tfvars already exists — remove it first or edit in place."
+        exit 1
+    fi
+    cp "$src" terraform.tfvars
+    echo "Created terraform.tfvars from $src — edit it before plan/apply."
+
 # Create a plan and save it to ./plan
 @plan *ARGS:
     terraform plan -out plan {{ ARGS }}

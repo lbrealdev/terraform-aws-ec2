@@ -1,35 +1,47 @@
-# terraform-template
+# terraform-aws-ec2
 
-Public **Template** for new Terraform repos in [to-ge-da](https://github.com/to-ge-da).
+Terraform stack that creates one EC2 instance from network that already exists.
+Same shape as [terraform-aws-rds](https://github.com/lbrealdev/terraform-aws-rds): look up the network, then create the resource. This module does not create a VPC, subnet, or security group.
 
-Org defaults (tooling, CI, GitHub templates) **without** product HCL — no `versions.tf`, modules, or remote backend yet.
+## Interface
 
-## How to use
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `vpc_id` | yes | Existing VPC (`vpc-...`) |
+| `subnet_id` | yes | Existing subnet in that VPC (`subnet-...`) |
+| `security_group_id` | yes | Existing security group in that VPC (`sg-...`) |
+| `name` | yes | `Name` tag of the instance |
+| `user_data` | no | User data script. Sensitive. Omit to leave it unset |
+| `iam_instance_profile` | no | Name of an existing IAM instance profile. Omit to leave it unset. This stack does not create the profile |
+| `ami` | yes | AMI ID (`ami-...`). No default image |
+| `instance_type` | no | Defaults to `t3.micro` |
+| `aws_region` | no | Defaults to `eu-central-1` |
 
-1. Click **Use this template** → **Create a new repository**.
-2. Clone, then `mise install`.
-3. Run `just --list` for tasks. Add root-module `*.tf`, then use `just init` / `just plan` / `just apply` as usual.
+## Commands
 
-## Included files
+```bash
+mise trust
+just use-config
+# edit terraform.tfvars with the VPC, subnet, security group, AMI, and name
+just init
+just validate
+just plan
+just apply
+```
+
+Run `mise trust` once per clone. `mise.toml` sets `auto_install = false`, and mise ignores `[settings]` until that file is trusted. After trust, entering the directory or running `just` does not install tools. Install the pinned toolchain only when you want it:
+
+```bash
+mise install
+```
+
+`just use-config` copies `examples/ec2.tfvars.example` to `terraform.tfvars`. That file is gitignored. Terraform loads it automatically. `just plan` and `just apply` need AWS credentials for the account that owns those IDs. `just validate` does not.
+
+## Layout
 
 | Path | Purpose |
 |------|---------|
-| `AGENTS.md` | Notes for coding agents |
-| `justfile` | fmt/validate/init/plan/apply/destroy/cleanup, CI scan/pin |
-| `mise.toml` | Pinned `terraform`, `just`, `jq`, `zizmor`, `pinact` |
-| `.gitignore` | Terraform / local / env ignores |
-| `.github/workflows/ci.yml` | Light CI (hygiene; Terraform soft-skips until root `*.tf` exists) |
-| `.github/dependabot.yml` | Weekly GitHub Actions + Terraform updates |
-| `.github/pull_request_template.md` | PR checklist |
-| `.github/ISSUE_TEMPLATE/` | Bug and feature templates |
-
-## Quick commands
-
-```bash
-just --list
-just fmt
-just plan
-just ci-scan
-```
-
-`just destroy` and `just cleanup` prompt for confirmation. CI soft-skips Terraform checks while this template has no root-module `*.tf` / `*.tf.json`.
+| `examples/ec2.tfvars.example` | Committed placeholder values |
+| `terraform.tfvars` | Local values, created by `just use-config`, not committed |
+| `modules/ec2_networking_data` | Reads the VPC, subnet, and security group. Fails if the subnet or security group is not in `vpc_id` |
+| `modules/ec2_instance` | Creates `aws_instance` |

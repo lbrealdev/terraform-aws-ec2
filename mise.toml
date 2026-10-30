@@ -1,3 +1,8 @@
+# Ignored until `mise trust`. After trust, cd / shims / just do not install tools.
+# Install the pins explicitly with `mise install`.
+[settings]
+auto_install = false
+
 [tools]
 terraform = "1.16.5"
 just = "1.58.0"
