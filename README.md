@@ -1,47 +1,131 @@
 # terraform-aws-ec2
 
-Terraform stack that creates one EC2 instance from network that already exists.
-Same shape as [terraform-aws-rds](https://github.com/lbrealdev/terraform-aws-rds): look up the network, then create the resource. This module does not create a VPC, subnet, or security group.
+Terraform module stack that creates one EC2 instance from a VPC, subnet, and security groups that already exist. Look up the network, then create the resource. This module does not create a VPC, subnet, or security group.
 
-## Interface
+## Table of Contents
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `vpc_id` | yes | Existing VPC (`vpc-...`) |
-| `subnet_id` | yes | Existing subnet in that VPC (`subnet-...`) |
-| `security_group_id` | yes | Existing security group in that VPC (`sg-...`) |
-| `name` | yes | `Name` tag of the instance |
-| `user_data` | no | User data script. Sensitive. Omit to leave it unset |
-| `iam_instance_profile` | no | Name of an existing IAM instance profile. Omit to leave it unset. This stack does not create the profile |
-| `ami` | yes | AMI ID (`ami-...`). No default image |
-| `instance_type` | no | Defaults to `t3.micro` |
-| `aws_region` | no | Defaults to `eu-central-1` |
+- [Quickstart](#quickstart)
+- [Configuration (Root Module)](#configuration-root-module)
+- [When to Use](#when-to-use)
+- [Modules Overview](#modules-overview)
+- [Contributing](#contributing)
 
-## Commands
+## Quickstart
+
+> [!NOTE]
+> This repo uses [mise](https://mise.jdx.dev) for the toolchain and [just](https://github.com/casey/just) for command shortcuts, but running the module only needs Terraform. See [docs/terraform-workflow.md](docs/terraform-workflow.md).
+
+`mise.toml` pins tools and sets `auto_install = false`.
 
 ```bash
 mise trust
-just use-config
-# edit terraform.tfvars with the VPC, subnet, security group, AMI, and name
-just init
-just validate
-just plan
-just apply
-```
-
-Run `mise trust` once per clone. `mise.toml` sets `auto_install = false`, and mise ignores `[settings]` until that file is trusted. After trust, entering the directory or running `just` does not install tools. Install the pinned toolchain only when you want it:
-
-```bash
 mise install
 ```
 
-`just use-config` copies `examples/ec2.tfvars.example` to `terraform.tfvars`. That file is gitignored. Terraform loads it automatically. `just plan` and `just apply` need AWS credentials for the account that owns those IDs. `just validate` does not.
+1. Copy the example into gitignored `terraform.tfvars` and fill in the required IDs:
 
-## Layout
+```bash
+just tfvars
+```
 
-| Path | Purpose |
-|------|---------|
-| `examples/ec2.tfvars.example` | Committed placeholder values |
-| `terraform.tfvars` | Local values, created by `just use-config`, not committed |
-| `modules/ec2_networking_data` | Reads the VPC, subnet, and security group. Fails if the subnet or security group is not in `vpc_id` |
-| `modules/ec2_instance` | Creates `aws_instance` |
+2. Run:
+
+```bash
+just init
+just plan
+# review plan
+just apply
+# later: just cleanup
+```
+
+AWS credentials for the account that owns the VPC, subnet, and security groups (for example, `aws configure` or `AWS_PROFILE`).
+
+### Minimal Example
+
+```hcl
+module "ec2_networking_data" {
+  source = "./modules/ec2_networking_data"
+
+  enabled            = true
+  vpc_id             = var.vpc_id
+  subnet_id          = var.subnet_id
+  security_group_ids = var.security_group_ids
+}
+
+module "ec2_instance" {
+  source = "./modules/ec2_instance"
+
+  enabled            = true
+  name               = "ec2-dev-instance"
+  ami                = var.ami
+  instance_type      = "t3.micro"
+  subnet_id          = module.ec2_networking_data.subnet_id
+  security_group_ids = module.ec2_networking_data.security_group_ids
+
+  root_block_device = {
+    volume_size = 30
+    volume_type = "gp3"
+    encrypted   = true
+  }
+
+  metadata_options = {
+    http_tokens = "required"
+  }
+}
+```
+
+See [`examples/ec2.tfvars.example`](examples/ec2.tfvars.example) for a full commented profile.
+
+## Configuration (Root Module)
+
+Key variables available in the root stack:
+
+| Section | Variable | Description |
+|---------|----------|-------------|
+| **Global** | `aws_region` | AWS region for the provider (default `eu-central-1`) |
+| **Global** | `prefix_name` | Prefix for resource names (default `dev`). Used as `ec2-<prefix>-instance` when `name` is unset |
+| **Global** | `tags` | Extra tags merged with `Name` on the instance (default `{}`) |
+| **Networking** | `networking_enabled` | Enable VPC/subnet/security group lookups (default `true`) |
+| **Networking** | `vpc_id` | Existing VPC ID (`vpc-...`) |
+| **Networking** | `subnet_id` | Existing subnet ID in that VPC (`subnet-...`) |
+| **Networking** | `security_group_ids` | List of existing security group IDs (`sg-...`) |
+| **Instance** | `instance_enabled` | Enable instance creation (default `true`) |
+| **Instance** | `name` | Name tag override. Null uses `ec2-<prefix_name>-instance` |
+| **Instance** | `ami` | AMI ID (`ami-...`). No default image |
+| **Instance** | `instance_type` | Instance type (default `t3.micro`) |
+| **Instance** | `key_name` | Existing key pair name. Null leaves SSH key unset |
+| **Instance** | `associate_public_ip_address` | Associate a public IP. Null uses the subnet setting |
+| **Instance** | `monitoring` | Detailed monitoring (default `false`) |
+| **Instance** | `iam_instance_profile` | Name of an existing instance profile. This stack does not create the profile |
+| **Instance** | `user_data` | User data script. Sensitive. Null leaves it unset |
+| **Storage** | `root_block_device` | Root volume (`volume_size` default `30`, `volume_type` default `gp3`, `encrypted` default `true`) |
+| **Metadata** | `metadata_options` | Instance metadata options (`http_tokens` default `required`) |
+
+> [!TIP]
+> For a full list of variables, see `variables.tf`.
+
+## When to Use
+
+- **Existing network**: Place one instance in a VPC, subnet, and security groups you already manage
+- **Secure defaults**: Encrypted gp3 root volume and IMDSv2 (`http_tokens = required`) without extra configuration
+- **Multi-environment**: Standalone deployments for `dev`, `staging`, or `production` via `prefix_name`
+- **IaC governance**: Look up network IDs and fail when a subnet or security group is not in `vpc_id`
+
+## Modules Overview
+
+The stack is distributed across two core modules:
+
+- **[ec2_networking_data](./modules/ec2_networking_data/README.md)**: Optional lookups for an existing VPC, subnet, and security groups, with postconditions that every ID belongs to the VPC.
+- **[ec2_instance](./modules/ec2_instance/README.md)**: Provisioning of a single EC2 instance from those looked-up IDs.
+
+## Contributing
+
+Contributions are welcome. Please open an issue or submit a Pull Request following the standard repository workflow.
+
+> [!NOTE]
+> - **Development guide** — [`AGENTS.md`](./AGENTS.md) (conventions, workflow, command reference)
+> - **Toolchain** — [`mise.toml`](./mise.toml) via [mise](https://mise.jdx.dev): `mise install`
+
+## License
+
+MIT

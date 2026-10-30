@@ -11,19 +11,44 @@ provider "aws" {
 module "ec2_networking_data" {
   source = "./modules/ec2_networking_data"
 
-  vpc_id            = var.vpc_id
-  subnet_id         = var.subnet_id
-  security_group_id = var.security_group_id
+  enabled            = var.networking_enabled
+  vpc_id             = var.vpc_id
+  subnet_id          = var.subnet_id
+  security_group_ids = var.security_group_ids
 }
 
 module "ec2_instance" {
   source = "./modules/ec2_instance"
 
-  name                 = var.name
-  ami                  = var.ami
-  instance_type        = var.instance_type
+  # --- Instance ---
+  enabled       = var.instance_enabled
+  name          = local.instance_name
+  ami           = var.ami
+  instance_type = var.instance_type
+  key_name      = var.key_name
+  monitoring    = var.monitoring
+
+  # --- Access ---
   user_data            = var.user_data
   iam_instance_profile = var.iam_instance_profile
-  subnet_id            = module.ec2_networking_data.subnet_id
-  security_group_id    = module.ec2_networking_data.security_group_id
+
+  # --- Network ---
+  subnet_id                   = module.ec2_networking_data.subnet_id
+  security_group_ids          = module.ec2_networking_data.security_group_ids
+  associate_public_ip_address = var.associate_public_ip_address
+
+  # --- Storage ---
+  root_block_device = var.root_block_device
+
+  # --- Metadata ---
+  metadata_options = var.metadata_options
+
+  tags = var.tags
+}
+
+check "instance_requires_networking" {
+  assert {
+    condition     = !var.instance_enabled || (var.networking_enabled && length(var.security_group_ids) > 0)
+    error_message = "instance_enabled requires networking_enabled and at least one security_group_ids value."
+  }
 }

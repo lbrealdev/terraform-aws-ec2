@@ -1,57 +1,114 @@
-# Format Terraform files in place
-@fmt:
-    terraform fmt -write=true -recursive
+set dotenv-load := true
 
-# Init (no backend) then validate — matches CI validate path
-@validate:
-    terraform init -backend=false
-    terraform validate
+# ============================================================================
+# Primary aliases
+# ============================================================================
+alias t := mise-tools
+alias sts := aws-check
 
-# Initialize Terraform (providers / modules / backend)
-@init *ARGS:
-    terraform init {{ ARGS }}
+# Simple aliases for Terraform recipes
+alias plan := tf-plan
+alias apply := tf-apply
+alias destroy := tf-destroy
+alias fmt := tf-lint
+alias validate := tf-check
+alias docs := tf-docs
+alias init := tf-init
+alias cleanup := tf-cleanup
+alias list := tf-list
+alias show := tf-show
+alias refresh := tf-refresh
 
-# Scaffold terraform.tfvars from examples/<profile>.tfvars.example (default: ec2)
-use-config profile="ec2":
+# ============================================================================
+# AWS & tooling
+# ============================================================================
+
+# Check current AWS identity
+@aws-check:
+    aws sts get-caller-identity
+
+# List mise tools installed in the current directory
+@mise-tools:
+    mise ls --json | jq -r --arg pwd "$(pwd)" 'to_entries[] | select(.value[].source.path != null and (.value[].source.path | contains($pwd))) | .key'
+
+# ============================================================================
+# Configuration
+# ============================================================================
+
+# Copy examples/ec2.tfvars.example to gitignored terraform.tfvars
+tfvars:
     #!/usr/bin/env bash
     set -euo pipefail
-    src="examples/{{ profile }}.tfvars.example"
-    if [ ! -f "$src" ]; then
-        echo "Unknown profile: {{ profile }}"
-        echo "Available:"
-        ls examples/*.tfvars.example
-        exit 1
-    fi
+    src="examples/ec2.tfvars.example"
     if [ -f terraform.tfvars ]; then
-        echo "terraform.tfvars already exists — remove it first or edit in place."
+        echo "terraform.tfvars already exists. Remove it first or edit it in place."
         exit 1
     fi
     cp "$src" terraform.tfvars
-    echo "Created terraform.tfvars from $src — edit it before plan/apply."
+    echo "Created terraform.tfvars from $src. Edit it before plan/apply."
 
-# Create a plan and save it to ./plan
-@plan *ARGS:
-    terraform plan -out plan {{ ARGS }}
+# ============================================================================
+# Terraform recipes
+# ============================================================================
 
-# Apply the saved ./plan file
-@apply:
-    terraform apply plan
+# Initialize Terraform (providers/modules/backend)
+@tf-init *var:
+    terraform init {{ var }}
 
-# Plan a destroy, then confirm before applying it
-@destroy *ARGS:
-    terraform plan -destroy -out destroy {{ ARGS }}
-    just _destroy-apply
-
-[confirm("Destroy all Terraform-managed resources? This cannot be undone.")]
-@_destroy-apply:
-    terraform apply destroy
-
-# Remove local Terraform artifacts (does not destroy cloud resources)
-[confirm("Remove local .terraform / plan / state artifacts? Cloud resources are not destroyed.")]
-@cleanup:
+# Remove local Terraform artifacts (.terraform, plan files, crash logs, local state)
+[confirm("Remove local Terraform artifacts (.terraform, plan/destroy files, crash logs, local state)? This does not destroy cloud resources.")]
+@tf-cleanup:
     rm -rf .terraform
     rm -f plan destroy crash.log crash.*.log *.tfstate *.tfstate.*
     echo "Local Terraform artifacts removed."
+
+# Create a plan and save it to a file
+@tf-plan *var:
+    terraform plan -out plan {{ var }}
+
+# Apply the saved plan
+@tf-apply *var:
+    terraform apply plan {{ var }}
+
+# Create a destroy plan and apply it
+@tf-destroy *var:
+    terraform plan -destroy -out destroy {{ var }}
+    just _tf-destroy
+
+# Confirmation prompt for destroy
+[confirm("Are you sure you want to destroy all Terraform resources? This action cannot be undone.")]
+@_tf-destroy:
+    terraform apply destroy
+
+# Format Terraform files (write changes in place)
+@tf-lint:
+    terraform fmt -write=true -recursive
+
+# Validate terraform configuration
+@tf-check:
+    terraform validate
+
+# Generate/update Terraform documentation
+@tf-docs:
+    terraform-docs markdown table --output-file=README.md --output-mode=replace .
+
+# Terraform state management
+
+# Show terraform state
+@tf-show:
+    terraform show
+
+# List terraform state resources
+@tf-list:
+    terraform state list
+
+# Refresh terraform state
+@tf-refresh:
+    terraform refresh
+
+# ============================================================================
+# CI hygiene
+# ============================================================================
 
 # CI workflow hygiene (zizmor + pinact verify)
 [working-directory('.github')]
