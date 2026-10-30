@@ -38,7 +38,7 @@ just apply
 # later: just cleanup
 ```
 
-AWS credentials for the account that owns the VPC, subnet, and security groups (for example, `aws configure` or `AWS_PROFILE`). `just validate` does not.
+AWS credentials for the account that owns the VPC, subnet, and security groups (for example, `aws configure` or `AWS_PROFILE`).
 
 ### Minimal Example
 
