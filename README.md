@@ -1,6 +1,6 @@
 # terraform-aws-ec2
 
-Terraform module stack that creates one EC2 instance from a VPC, subnet, and security groups that already exist. Same shape as [terraform-aws-rds](https://github.com/lbrealdev/terraform-aws-rds): look up the network, then create the resource. This module does not create a VPC, subnet, or security group.
+Terraform module stack that creates one EC2 instance from a VPC, subnet, and security groups that already exist. Look up the network, then create the resource. This module does not create a VPC, subnet, or security group.
 
 ## Table of Contents
 
@@ -65,6 +65,7 @@ module "ec2_instance" {
   security_group_ids = module.ec2_networking_data.security_group_ids
 
   root_block_device = {
+    volume_size = 30
     volume_type = "gp3"
     encrypted   = true
   }
@@ -99,7 +100,7 @@ Key variables available in the root stack:
 | **Instance** | `monitoring` | Detailed monitoring (default `false`) |
 | **Instance** | `iam_instance_profile` | Name of an existing instance profile. This stack does not create the profile |
 | **Instance** | `user_data` | User data script. Sensitive. Null leaves it unset |
-| **Storage** | `root_block_device` | Root volume (`volume_type` default `gp3`, `encrypted` default `true`) |
+| **Storage** | `root_block_device` | Root volume (`volume_size` default `30`, `volume_type` default `gp3`, `encrypted` default `true`) |
 | **Metadata** | `metadata_options` | Instance metadata options (`http_tokens` default `required`) |
 
 > [!TIP]
@@ -126,7 +127,6 @@ Contributions are welcome. Please open an issue or submit a Pull Request followi
 > [!NOTE]
 > - **Development guide** — [`AGENTS.md`](./AGENTS.md) (conventions, workflow, command reference)
 > - **Toolchain** — [`mise.toml`](./mise.toml) via [mise](https://mise.jdx.dev): `mise install`
-> - **Cursor Cloud setup** — [`.cursor/rules/cloud-agent-environment.mdc`](.cursor/rules/cloud-agent-environment.mdc)
 
 ## License
 

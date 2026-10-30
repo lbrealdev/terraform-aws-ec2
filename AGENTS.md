@@ -56,14 +56,3 @@ just plan          # plan (needs AWS creds + existing network)
 just apply         # apply
 just cleanup       # remove local Terraform artifacts (prompts; does not destroy cloud resources)
 ```
-
-## Cloud agent environments
-
-Automated environments install the toolchain via `mise` (`mise.toml`). `plan`
-and `apply` need real AWS credentials plus a pre-existing VPC, subnet, and
-security groups — the provider validates credentials via STS even during
-`plan` — so agents can only run the offline loop (`just init`, `just validate`,
-`just fmt`) without AWS access.
-
-Per-platform setup lives with its own config; Cursor Cloud is in
-[`.cursor/rules/cloud-agent-environment.mdc`](.cursor/rules/cloud-agent-environment.mdc).
