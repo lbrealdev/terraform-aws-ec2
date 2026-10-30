@@ -19,7 +19,7 @@ just init
 just tf-check
 ```
 
-Skip `just plan` and `just apply` without AWS credentials.
+AWS credentials for the account that owns the VPC, subnet, and security groups (for example, `aws configure` or `AWS_PROFILE`).
 
 Do not run `just tf-docs`. It overwrites `README.md`. Edit README and module READMEs by hand.
 

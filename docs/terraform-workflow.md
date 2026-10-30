@@ -5,7 +5,7 @@ Commands run from the repository root. This module does not use `-chdir`.
 ## Prerequisites
 
 - Terraform installed (`>= 1.2`; see `versions.tf`)
-- AWS credentials on the standard AWS credential chain (environment variables, shared config/credentials files, or an instance/container role). `plan`, `apply`, `output`, and `destroy` need credentials for the account that owns the VPC, subnet, and security groups.
+- AWS credentials for the account that owns the VPC, subnet, and security groups (for example, `aws configure` or `AWS_PROFILE`).
 
 ## terraform.tfvars
 
