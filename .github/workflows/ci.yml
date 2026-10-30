@@ -24,7 +24,7 @@ jobs:
           persist-credentials: false
 
       - name: Install hygiene tools
-        uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
         with:
           # Only zizmor + pinact — do not install terraform/just/jq here.
           install_args: zizmor pinact
@@ -44,7 +44,7 @@ jobs:
           persist-credentials: false
 
       - name: Install mise tools
-        uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
 
       - name: Soft-skip or run Terraform checks
         run: |
